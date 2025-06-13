@@ -1,0 +1,145 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #1e1e2f;
+    color: #ffffff;
+    margin: 0;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.left-sidebar {
+    width: 200px;
+    background-color: #2a2a3f;
+    color: #ffffff;
+    padding: 20px;
+    overflow-y: auto;
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+}
+
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    margin-left: 200px;
+    margin-right: 300px;
+}
+
+.stats {
+    margin: 20px 0;
+    text-align: center;
+}
+
+h1 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+}
+
+.score-display {
+    font-size: 1.8rem;
+    margin: 10px 0;
+}
+
+.exp-bar-container {
+    width: 200px;
+    height: 20px;
+    background-color: #4a4a6a;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 10px auto;
+}
+
+.exp-bar {
+    height: 100%;
+    background-color: #083b4d;
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+.click-btn {
+    padding: 15px 30px;
+    font-size: 1.2rem;
+    background-color: #4caf50;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 20px 0;
+    transition: background-color 0.3s, transform 0.1s;
+}
+
+.click-btn:hover {
+    background-color: #45a049;
+}
+
+.click-btn:active {
+    transform: scale(1.1);
+}
+
+.prestige-btn {
+    padding: 10px 20px;
+    font-size: 1rem;
+    background-color: #ff9800;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 10px 0;
+    transition: background-color 0.3s;
+}
+
+.prestige-btn:hover {
+    background-color: #e68a00;
+}
+
+.sidebar {
+    width: 300px;
+    background-color: #008cba;
+    color: #ffffff;
+    padding: 20px;
+    overflow-y: auto;
+    position: fixed;
+    right: 0;
+    top: 0;
+    bottom: 0;
+}
+
+.shop-item {
+    background-color: #2a2a3f;
+    border-radius: 8px;
+    padding: 15px;
+    margin: 10px 0;
+    text-align: left;
+}
+
+.shop-item h3, .shop-item h4 {
+    font-size: 1.2rem;
+    margin-bottom: 5px;
+}
+
+.shop-item p {
+    font-size: 1rem;
+    margin: 5px 0;
+}
+
+.shop-btn {
+    width: 100%;
+    padding: 8px;
+    font-size: 1rem;
+    background-color: #4caf50;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.shop-btn:hover {
+    background-color: #45a049;
+}
