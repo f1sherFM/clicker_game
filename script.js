@@ -141,7 +141,6 @@ function loadProgress() {
                 { name: "Энергетик", cost: 250, bonusEnergy: 30 },
                 { name: "Кристалл опыта", cost: 500, expBoost: 1.2 }
             ];
-            // Оффлайн-прогресс
             if (gameState.lastSavedTime) {
                 const maxOfflineTime = 7200 + playerLevel * 600; // 2 часа + 10 мин/уровень
                 const offlineTime = Math.min((Date.now() - gameState.lastSavedTime) / 1000, maxOfflineTime);
@@ -223,14 +222,15 @@ function checkLevelUp() {
     }
 }
 
-function handleClick() {
+function handleClick(e) {
+    e.preventDefault(); // Предотвращаем стандартное поведение
     if (energy >= 1) {
         const pointsEarned = clickMultiplier * prestigeMultiplier;
         score += pointsEarned;
         totalScoreEarned += pointsEarned;
         energy -= 1;
         totalClicks += 1;
-        exp += 1 * expMultiplier; // +1 EXP с учётом множителя
+        exp += 1 * expMultiplier;
         checkLevelUp();
         updateScore();
         saveProgress();
@@ -240,7 +240,6 @@ function handleClick() {
 }
 
 function buyAutoclicker(index) {
-    console.log('Попытка покупки автокликера', index, 'Текущий score:', score);
     const autoclicker = autoclickers[index];
     if (score >= autoclicker.cost) {
         score -= autoclicker.cost;
@@ -258,7 +257,6 @@ function buyAutoclicker(index) {
 }
 
 function buyClickUpgrade(index) {
-    console.log('Попытка покупки улучшения клика', index, 'Текущий score:', score);
     const upgrade = clickUpgrades[index];
     if (score >= upgrade.cost) {
         score -= upgrade.cost;
@@ -274,7 +272,6 @@ function buyClickUpgrade(index) {
 }
 
 function buyPassiveUpgrade(index) {
-    console.log('Попытка покупки пассивного улучшения', index, 'Текущий score:', score);
     const upgrade = passiveUpgrades[index];
     if (score >= upgrade.cost) {
         score -= upgrade.cost;
@@ -294,7 +291,6 @@ function buyPassiveUpgrade(index) {
 }
 
 function buyItem(index) {
-    console.log('Попытка покупки предмета', index, 'Текущий score:', score);
     const item = items[index];
     if (score >= item.cost) {
         score -= item.cost;
@@ -303,7 +299,7 @@ function buyItem(index) {
         }
         if (item.expBoost) {
             expMultiplier *= item.expBoost;
-            items.splice(index, 1); // Удаляем после покупки
+            items.splice(index, 1);
         }
         itemsBought += 1;
         updateScore();
@@ -360,7 +356,7 @@ function updateShop() {
             <p>Очков/сек: ${(autoclicker.baseCps * autoclicker.owned * autoclickerMultiplier).toFixed(1)}</p>
             <p>Стоимость: ${autoclicker.cost} очков</p>
             <p>Куплено: ${autoclicker.owned}</p>
-            <button class="shop-btn" data-type="autoclicker" data-index="${index}">Купить</button>
+            <button class="shop-btn" data-type="autoclicker" data-index="${index}" aria-label="Купить ${autoclicker.name}">Купить</button>
         `;
         shopContainer.appendChild(itemDiv);
     });
@@ -374,7 +370,7 @@ function updateShop() {
                 <h4>${upgrade.name}</h4>
                 <p>Множитель: x${upgrade.multiplier}</p>
                 <p>Стоимость: ${upgrade.cost} очков</p>
-                <button class="shop-btn" data-type="clickupgrade" data-index="${index}">Купить</button>
+                <button class="shop-btn" data-type="clickupgrade" data-index="${index}" aria-label="Купить ${upgrade.name}">Купить</button>
             `;
             shopContainer.appendChild(itemDiv);
         });
@@ -389,7 +385,7 @@ function updateShop() {
                 <h4>${upgrade.name}</h4>
                 <p>Эффект: x${upgrade.cpsBoost}</p>
                 <p>Стоимость: ${upgrade.cost} очков</p>
-                <button class="shop-btn" data-type="passiveupgrade" data-index="${index}">Купить</button>
+                <button class="shop-btn" data-type="passiveupgrade" data-index="${index}" aria-label="Купить ${upgrade.name}">Купить</button>
             `;
             shopContainer.appendChild(itemDiv);
         });
@@ -404,7 +400,7 @@ function updateShop() {
                 <h4>${item.name}</h4>
                 <p>Эффект: ${item.bonusEnergy ? `+${item.bonusEnergy} энергии` : `+20% к опыту`}</p>
                 <p>Стоимость: ${item.cost} очков</p>
-                <button class="shop-btn" data-type="item" data-index="${index}">Купить</button>
+                <button class="shop-btn" data-type="item" data-index="${index}" aria-label="Купить ${item.name}">Купить</button>
             `;
             shopContainer.appendChild(itemDiv);
         });
@@ -421,13 +417,17 @@ function updateStatsAndLevel() {
             <p>Оффлайн-EXP: ${Math.floor(offlineExpTotal)}</p>
             <p>Предметов куплено: ${itemsBought}</p>
             <p>Время игры: ${Math.floor(playTime / 60)} минут</p>
-            <button class="reset-btn" id="reset-button">Сбросить прогресс</button>
+            <button class="reset-btn" id="reset-button" aria-label="Сбросить прогресс">Сбросить прогресс</button>
         `;
-        // Переназначаем обработчик для кнопки сброса
         const resetButton = document.getElementById('reset-button');
         if (resetButton) {
             resetButton.removeEventListener('click', showResetModal);
+            resetButton.removeEventListener('touchstart', showResetModal);
             resetButton.addEventListener('click', showResetModal);
+            resetButton.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                showResetModal();
+            });
         }
     }
     if (levelDisplay && expDisplay && expBar) {
@@ -448,50 +448,64 @@ function updateScore() {
     }
 }
 
-shopContainer.addEventListener('click', (e) => {
+function handleShopInteraction(e) {
+    e.preventDefault();
     const button = e.target.closest('.shop-btn');
     if (!button) return;
 
     const type = button.getAttribute('data-type');
     const index = parseInt(button.getAttribute('data-index'), 10);
 
-    console.log(`Клик по кнопке: ${type}, индекс: ${index}, score: ${score}`);
+    console.log(`Клик/касание по кнопке: ${type}, индекс: ${index}, score: ${score}`);
 
     if (type === 'autoclicker') buyAutoclicker(index);
     else if (type === 'clickupgrade') buyClickUpgrade(index);
     else if (type === 'passiveupgrade') buyPassiveUpgrade(index);
     else if (type === 'item') buyItem(index);
-});
+}
 
-setInterval(() => {
-    energy = Math.min(maxEnergy, energy + energyRegenRate / 10);
-    const pointsEarned = (totalCps * prestigeMultiplier) / 10;
-    score += pointsEarned;
-    totalScoreEarned += pointsEarned;
-    exp += (totalCps / 10) * expMultiplier;
-    checkLevelUp();
-    playTime += 0.1;
-    updateScore();
-    saveProgress();
-}, 100);
+shopContainer.addEventListener('click', handleShopInteraction);
+shopContainer.addEventListener('touchstart', handleShopInteraction);
+
+function handleReset() {
+    localStorage.removeItem('clickerGameState');
+    location.reload();
+}
 
 window.onload = () => {
     loadProgress();
     if (clickButton) {
         clickButton.removeEventListener('click', handleClick);
+        clickButton.removeEventListener('touchstart', handleClick);
         clickButton.addEventListener('click', handleClick);
+        clickButton.addEventListener('touchstart', handleClick);
     }
     if (prestigeButton) {
+        prestigeButton.removeEventListener('click', prestige);
+        prestigeButton.removeEventListener('touchstart', prestige);
         prestigeButton.addEventListener('click', prestige);
+        prestigeButton.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            prestige();
+        });
     }
     if (confirmReset) {
-        confirmReset.addEventListener('click', () => {
-            localStorage.removeItem('clickerGameState');
-            location.reload();
+        confirmReset.removeEventListener('click', handleReset);
+        confirmReset.removeEventListener('touchstart', handleReset);
+        confirmReset.addEventListener('click', handleReset);
+        confirmReset.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            handleReset();
         });
     }
     if (cancelReset) {
+        cancelReset.removeEventListener('click', hideResetModal);
+        cancelReset.removeEventListener('touchstart', hideResetModal);
         cancelReset.addEventListener('click', hideResetModal);
+        cancelReset.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            hideResetModal();
+        });
     }
     if (resetModal) {
         resetModal.addEventListener('click', (e) => {
@@ -499,6 +513,30 @@ window.onload = () => {
                 hideResetModal();
             }
         });
+        resetModal.addEventListener('touchstart', (e) => {
+            if (e.target === resetModal) {
+                hideResetModal();
+            }
+        });
     }
     updateScore();
 };
+
+let lastUpdate = 0;
+function optimizedUpdate(timestamp) {
+    if (timestamp - lastUpdate >= 100) {
+        energy = Math.min(maxEnergy, energy + energyRegenRate / 10);
+        const pointsEarned = (totalCps * prestigeMultiplier) / 10;
+        score += pointsEarned;
+        totalScoreEarned += pointsEarned;
+        exp += (totalCps / 10) * expMultiplier;
+        checkLevelUp();
+        playTime += 0.1;
+        updateScore();
+        saveProgress();
+        lastUpdate = timestamp;
+    }
+    requestAnimationFrame(optimizedUpdate);
+}
+
+requestAnimationFrame(optimizedUpdate);
