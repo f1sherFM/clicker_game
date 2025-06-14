@@ -1,2 +1,2 @@
-# clicker_game
-The test game for my tgchannel https://t.me/tipocodim (frontend)
+## clicker_game
+The test frontend game for my tgchannel https://t.me/tipocodim 
