@@ -6,7 +6,26 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    overflow: auto;
+    overflow-x: hidden;
+}
+
+.container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.section {
+    min-height: 100vh;
+    display: none;
+    flex-direction: column;
+    scroll-behavior: smooth;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.section.active {
+    display: flex;
 }
 
 .left-sidebar, .sidebar {
@@ -14,14 +33,10 @@ body {
     background-color: #2a2a3f;
     padding: 15px;
     box-sizing: border-box;
-}
-
-.left-sidebar {
-    order: 2; /* Статистика внизу на мобильных */
+    overflow-y: auto;
 }
 
 .sidebar {
-    order: 1; /* Магазин вверху */
     background-color: #008cba;
 }
 
@@ -32,7 +47,7 @@ body {
     align-items: center;
     justify-content: center;
     padding: 15px;
-    margin: 0;
+    text-align: center;
 }
 
 h1 {
@@ -71,15 +86,12 @@ h1 {
     border-radius: 8px;
     cursor: pointer;
     margin: 15px 0;
-    touch-action: manipulation; /* Улучшает отзывчивость на сенсорных устройствах */
+    touch-action: manipulation;
+    transform: translateZ(0);
 }
 
 .click-btn:hover {
     background-color: #45a049;
-}
-
-.click-btn:active {
-    transform: scale(1.1);
 }
 
 .prestige-btn {
@@ -91,6 +103,8 @@ h1 {
     border-radius: 8px;
     cursor: pointer;
     margin: 10px 0;
+    touch-action: manipulation;
+    transform: translateZ(0);
 }
 
 .prestige-btn:hover {
@@ -123,15 +137,50 @@ h1 {
     border: none;
     border-radius: 8px;
     cursor: pointer;
+    touch-action: manipulation;
+    transform: translateZ(0);
 }
 
 .shop-btn:hover {
     background-color: #45a049;
 }
 
+.nav-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #2a2a3f;
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0;
+    z-index: 1000;
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.nav-btn {
+    padding: 10px 20px;
+    font-size: 1rem;
+    background-color: #4a4a6a;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    touch-action: manipulation;
+    transform: translateZ(0);
+}
+
+.nav-btn.active {
+    background-color: #4caf50;
+}
+
+.nav-btn:hover {
+    background-color: #45a049;
+}
+
 #notifications {
     position: fixed;
-    bottom: 10px;
+    bottom: 70px;
     right: 10px;
     width: 90%;
     max-width: 300px;
@@ -145,7 +194,8 @@ h1 {
     margin-top: 8px;
     border-radius: 5px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-    animation: slide-in 0.5s ease forwards, slide-out 0.5s ease 3.5s forwards;
+    animation: slide-in 0.3s ease forwards, slide-out 0.3s ease 3.5s forwards;
+    will-change: transform; /* Оптимизация для анимации */
 }
 
 @keyframes slide-in {
@@ -168,10 +218,30 @@ h1 {
     border-radius: 8px;
     cursor: pointer;
     margin-top: 15px;
+    touch-action: manipulation;
+    transform: translateZ(0);
 }
 
 .reset-btn:hover {
     background-color: #cc0000;
+}
+
+.save-btn {
+    width: 100%;
+    padding: 10px;
+    font-size: 1.1rem;
+    background-color: #2196F3;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 15px;
+    touch-action: manipulation;
+    transform: translateZ(0);
+}
+
+.save-btn:hover {
+    background-color: #1976D2;
 }
 
 .modal {
@@ -212,6 +282,8 @@ h1 {
     border: none;
     border-radius: 8px;
     cursor: pointer;
+    touch-action: manipulation;
+    transform: translateZ(0);
 }
 
 .confirm-btn {
@@ -232,33 +304,79 @@ h1 {
     background-color: #45a049;
 }
 
-/* Медиа-запросы для мобильных устройств */
+/* Ограничение :hover только для десктопов */
+@media (hover: hover) {
+    .click-btn:hover {
+        background-color: #45a049;
+    }
+    .prestige-btn:hover {
+        background-color: #e68a00;
+    }
+    .shop-btn:hover {
+        background-color: #45a049;
+    }
+    .nav-btn:hover {
+        background-color: #45a049;
+    }
+    .reset-btn:hover {
+        background-color: #cc0000;
+    }
+    .save-btn:hover {
+        background-color: #1976D2;
+    }
+    .confirm-btn:hover {
+        background-color: #cc0000;
+    }
+    .cancel-btn:hover {
+        background-color: #45a049;
+    }
+}
+
+/* Медиа-запросы для десктопов */
 @media (min-width: 768px) {
-    body {
+    .container {
         flex-direction: row;
+        justify-content: center;
+        align-items: stretch;
+    }
+
+    .section {
+        min-height: auto;
+        display: block;
+        width: 100%;
     }
 
     .left-sidebar {
         width: 200px;
-        position: fixed;
+        position: absolute;
         left: 0;
         top: 0;
         bottom: 0;
-        order: 0;
+        background-color: #2a2a3f;
     }
 
     .sidebar {
         width: 300px;
-        position: fixed;
+        position: absolute;
         right: 0;
         top: 0;
         bottom: 0;
-        order: 0;
+        background-color: #008cba;
     }
 
     .main-content {
-        margin-left: 200px;
-        margin-right: 300px;
+        margin-left: auto;
+        margin-right: auto;
+        max-width: 600px;
+        text-align: center;
+    }
+
+    .nav-bar {
+        display: none;
+    }
+
+    #notifications {
+        bottom: 10px;
     }
 
     h1 {

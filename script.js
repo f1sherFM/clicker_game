@@ -7,16 +7,16 @@ let totalCps = 0;
 let autoclickerMultiplier = 1;
 let playerLevel = 1;
 let exp = 0;
-let expNeeded = 60; // Начальный порог для уровня 2
-let expMultiplier = 1; // Множитель опыта
-let energyRegenRate = 2; // Скорость восстановления энергии
-let lastSavedTime = Date.now(); // Время последнего сохранения
-let offlineScoreTotal = 0; // Всего оффлайн-очков
-let offlineExpTotal = 0; // Всего оффлайн-EXP
+let expNeeded = 60;
+let expMultiplier = 1;
+let energyRegenRate = 2;
+let lastSavedTime = Date.now();
+let offlineScoreTotal = 0;
+let offlineExpTotal = 0;
 let totalClicks = 0;
 let totalScoreEarned = 0;
 let itemsBought = 0;
-let playTime = 0; // в секундах
+let playTime = 0;
 
 let autoclickers = [
     { name: "Мини-бот", cost: 15, baseCps: 0.1, owned: 0, totalCps: 0 },
@@ -55,6 +55,8 @@ const notificationsContainer = document.getElementById('notifications');
 const resetModal = document.getElementById('reset-modal');
 const confirmReset = document.getElementById('confirm-reset');
 const cancelReset = document.getElementById('cancel-reset');
+const navButtons = document.querySelectorAll('.nav-btn');
+const saveButton = document.createElement('button'); // Новая кнопка сохранения
 
 function showNotification(message) {
     if (notificationsContainer) {
@@ -81,7 +83,7 @@ function hideResetModal() {
     }
 }
 
-function saveProgress() {
+function saveProgress(showNotificationFlag = false) {
     try {
         const gameState = {
             score, clickMultiplier, prestigeMultiplier, energy, maxEnergy,
@@ -92,6 +94,9 @@ function saveProgress() {
         };
         localStorage.setItem('clickerGameState', JSON.stringify(gameState));
         lastSavedTime = Date.now();
+        if (showNotificationFlag) {
+            showNotification('Прогресс сохранен!');
+        }
     } catch (e) {
         console.error('Ошибка сохранения прогресса:', e);
         showNotification('Не удалось сохранить прогресс. Проверьте настройки браузера.');
@@ -142,7 +147,7 @@ function loadProgress() {
                 { name: "Кристалл опыта", cost: 500, expBoost: 1.2 }
             ];
             if (gameState.lastSavedTime) {
-                const maxOfflineTime = 7200 + playerLevel * 600; // 2 часа + 10 мин/уровень
+                const maxOfflineTime = 7200 + playerLevel * 600;
                 const offlineTime = Math.min((Date.now() - gameState.lastSavedTime) / 1000, maxOfflineTime);
                 if (offlineTime > 0) {
                     const offlineScore = totalCps * prestigeMultiplier * offlineTime;
@@ -172,7 +177,7 @@ function grantLevelReward() {
         {
             name: "Очки",
             apply: () => {
-                const points = Math.floor(Math.random() * 151) + 50; // 50–200
+                const points = Math.floor(Math.random() * 151) + 50;
                 score += points;
                 totalScoreEarned += points;
                 return `+${points} очков`;
@@ -201,7 +206,7 @@ function grantLevelReward() {
                     });
                     totalCps = autoclickers.reduce((sum, ac) => sum + ac.totalCps, 0);
                     updateScore();
-                }, 30000); // 30 секунд
+                }, 30000);
                 return "+10% к CPS на 30 секунд";
             }
         }
@@ -215,15 +220,15 @@ function checkLevelUp() {
     while (exp >= expNeeded) {
         exp -= expNeeded;
         playerLevel += 1;
-        prestigeMultiplier *= 1.1; // +10% к множителю престижа
-        expNeeded = Math.round(expNeeded * 1.75); // Новый порог: x1.75
+        prestigeMultiplier *= 1.1;
+        expNeeded = Math.round(expNeeded * 1.75);
         const rewardText = grantLevelReward();
         showNotification(`Поздравляем! Вы достигли уровня ${playerLevel}! Бонус: +10% к множителю престижа. Награда: ${rewardText}.`);
     }
 }
 
 function handleClick(e) {
-    e.preventDefault(); // Предотвращаем стандартное поведение
+    e.preventDefault();
     if (energy >= 1) {
         const pointsEarned = clickMultiplier * prestigeMultiplier;
         score += pointsEarned;
@@ -233,7 +238,7 @@ function handleClick(e) {
         exp += 1 * expMultiplier;
         checkLevelUp();
         updateScore();
-        saveProgress();
+        saveProgress(); // Без уведомления
     } else {
         showNotification("Недостаточно энергии!");
     }
@@ -249,7 +254,7 @@ function buyAutoclicker(index) {
         totalCps = autoclickers.reduce((sum, ac) => sum + ac.totalCps, 0);
         itemsBought += 1;
         updateScore();
-        saveProgress();
+        saveProgress(); // Без уведомления
         showNotification(`Куплен ${autoclicker.name}! Теперь вы зарабатываете ${autoclicker.totalCps.toFixed(1)} очков/сек.`);
     } else {
         showNotification(`Недостаточно очков! Нужно ${autoclicker.cost}.`);
@@ -264,7 +269,7 @@ function buyClickUpgrade(index) {
         clickUpgrades.splice(index, 1);
         itemsBought += 1;
         updateScore();
-        saveProgress();
+        saveProgress(); // Без уведомления
         showNotification(`Куплено улучшение ${upgrade.name}! Теперь множитель кликов: x${clickMultiplier}.`);
     } else {
         showNotification(`Недостаточно очков! Нужно ${upgrade.cost}.`);
@@ -283,7 +288,7 @@ function buyPassiveUpgrade(index) {
         passiveUpgrades.splice(index, 1);
         itemsBought += 1;
         updateScore();
-        saveProgress();
+        saveProgress(); // Без уведомления
         showNotification(`Куплено улучшение ${upgrade.name}! Теперь общий CPS: ${(totalCps * prestigeMultiplier).toFixed(1)}.`);
     } else {
         showNotification(`Недостаточно очков! Нужно ${upgrade.cost}.`);
@@ -303,7 +308,7 @@ function buyItem(index) {
         }
         itemsBought += 1;
         updateScore();
-        saveProgress();
+        saveProgress(); // Без уведомления
         showNotification(`Куплен ${item.name}! Энергия: ${Math.floor(energy)}/${maxEnergy}, множитель опыта: x${expMultiplier.toFixed(1)}.`);
     } else {
         showNotification(`Недостаточно очков! Нужно ${item.cost}.`);
@@ -339,7 +344,7 @@ function prestige() {
         ];
         prestigeMultiplier += 0.1;
         updateScore();
-        saveProgress();
+        saveProgress(); // Без уведомления
     } else {
         showNotification("Нужно 10,000 очков для престижа!");
     }
@@ -418,8 +423,10 @@ function updateStatsAndLevel() {
             <p>Предметов куплено: ${itemsBought}</p>
             <p>Время игры: ${Math.floor(playTime / 60)} минут</p>
             <button class="reset-btn" id="reset-button" aria-label="Сбросить прогресс">Сбросить прогресс</button>
+            <button class="save-btn" id="save-button" aria-label="Сохранить прогресс">Сохранить прогресс</button>
         `;
         const resetButton = document.getElementById('reset-button');
+        const saveButton = document.getElementById('save-button');
         if (resetButton) {
             resetButton.removeEventListener('click', showResetModal);
             resetButton.removeEventListener('touchstart', showResetModal);
@@ -427,6 +434,15 @@ function updateStatsAndLevel() {
             resetButton.addEventListener('touchstart', (e) => {
                 e.preventDefault();
                 showResetModal();
+            });
+        }
+        if (saveButton) {
+            saveButton.removeEventListener('click', saveProgress);
+            saveButton.removeEventListener('touchstart', saveProgress);
+            saveButton.addEventListener('click', () => saveProgress(true));
+            saveButton.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                saveProgress(true);
             });
         }
     }
@@ -464,16 +480,82 @@ function handleShopInteraction(e) {
     else if (type === 'item') buyItem(index);
 }
 
+function switchSection(sectionId) {
+    document.querySelectorAll('.section').forEach(section => {
+        section.classList.remove('active');
+    });
+    document.getElementById(sectionId).classList.add('active');
+
+    navButtons.forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.getAttribute('data-section') === sectionId) {
+            btn.classList.add('active');
+        }
+    });
+}
+
 shopContainer.addEventListener('click', handleShopInteraction);
 shopContainer.addEventListener('touchstart', handleShopInteraction);
 
+navButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+        switchSection(btn.getAttribute('data-section'));
+    });
+    btn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        switchSection(btn.getAttribute('data-section'));
+    });
+});
+
 function handleReset() {
     localStorage.removeItem('clickerGameState');
-    location.reload();
+    // Сброс состояния игры
+    score = 0;
+    clickMultiplier = 1;
+    prestigeMultiplier = 1;
+    energy = 100;
+    maxEnergy = 100;
+    totalCps = 0;
+    autoclickerMultiplier = 1;
+    playerLevel = 1;
+    exp = 0;
+    expNeeded = 60;
+    expMultiplier = 1;
+    energyRegenRate = 2;
+    lastSavedTime = Date.now();
+    offlineScoreTotal = 0;
+    offlineExpTotal = 0;
+    totalClicks = 0;
+    totalScoreEarned = 0;
+    itemsBought = 0;
+    playTime = 0;
+    autoclickers = [
+        { name: "Мини-бот", cost: 15, baseCps: 0.1, owned: 0, totalCps: 0 },
+        { name: "Средний бот", cost: 100, baseCps: 1, owned: 0, totalCps: 0 },
+        { name: "Мега-бот", cost: 1000, baseCps: 10, owned: 0, totalCps: 0 }
+    ];
+    clickUpgrades = [
+        { name: "Усиленный клик", cost: 50, multiplier: 2 },
+        { name: "Мега-клик", cost: 200, multiplier: 5 },
+        { name: "Гипер-клик", cost: 1000, multiplier: 10 }
+    ];
+    passiveUpgrades = [
+        { name: "Эффективность ботов +10%", cost: 300, cpsBoost: 1.1 },
+        { name: "Эффективность ботов +25%", cost: 1500, cpsBoost: 1.25 },
+        { name: "Супер эффективность", cost: 5000, cpsBoost: 1.5 }
+    ];
+    items = [
+        { name: "Энергетик", cost: 250, bonusEnergy: 30 },
+        { name: "Кристалл опыта", cost: 500, expBoost: 1.2 }
+    ];
+    updateScore();
+    hideResetModal();
+    location.reload(); // Перезагрузка страницы для полного сброса
 }
 
 window.onload = () => {
     loadProgress();
+    switchSection('game-section');
     if (clickButton) {
         clickButton.removeEventListener('click', handleClick);
         clickButton.removeEventListener('touchstart', handleClick);
@@ -522,6 +604,9 @@ window.onload = () => {
     updateScore();
 };
 
+// Авто-сохранение каждые 5 минут
+setInterval(() => saveProgress(), 5 * 60 * 1000);
+
 let lastUpdate = 0;
 function optimizedUpdate(timestamp) {
     if (timestamp - lastUpdate >= 100) {
@@ -533,7 +618,7 @@ function optimizedUpdate(timestamp) {
         checkLevelUp();
         playTime += 0.1;
         updateScore();
-        saveProgress();
+        saveProgress(); // Без уведомления
         lastUpdate = timestamp;
     }
     requestAnimationFrame(optimizedUpdate);

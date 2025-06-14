@@ -7,28 +7,42 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="left-sidebar" id="stats-sidebar">
-        <!-- Содержимое боковой панели -->
-    </div>
-
-    <div class="main-content">
-        <h1>Кликер</h1>
-        <div class="stats">
-            <div class="score-display" id="score">Очки: 0</div>
-            <div id="cps">Очков/сек: 0</div>
-            <div id="energy">Энергия: 100/100</div>
-            <div id="level">Уровень: 1</div>
-            <div id="exp">Опыт: 0 / 60</div>
-            <div class="exp-bar-container">
-                <div class="exp-bar" id="exp-bar"></div>
+    <div class="container">
+        <div class="section" id="shop-section">
+            <div class="sidebar" id="shop">
+                <!-- Содержимое магазина -->
             </div>
         </div>
-        <button class="click-btn" id="click-button">Клик</button>
-        <button class="prestige-btn" id="prestige-button">Престиж (x1.1) за 10,000 очков</button>
+
+        <div class="section" id="game-section">
+            <div class="main-content">
+                <h1>Кликер</h1>
+                <div class="stats">
+                    <div class="score-display" id="score">Очки: 0</div>
+                    <div id="cps">Очков/сек: 0</div>
+                    <div id="energy">Энергия: 100/100</div>
+                    <div id="level">Уровень: 1</div>
+                    <div id="exp">Опыт: 0 / 60</div>
+                    <div class="exp-bar-container">
+                        <div class="exp-bar" id="exp-bar"></div>
+                    </div>
+                </div>
+                <button class="click-btn" id="click-button">Клик</button>
+                <button class="prestige-btn" id="prestige-button">Престиж (x1.1) за 10,000 очков</button>
+            </div>
+        </div>
+
+        <div class="section" id="stats-section">
+            <div class="left-sidebar" id="stats-sidebar">
+                <!-- Содержимое статистики -->
+            </div>
+        </div>
     </div>
 
-    <div class="sidebar" id="shop">
-        <!-- Содержимое магазина -->
+    <div class="nav-bar">
+        <button class="nav-btn" data-section="shop-section">Магазин</button>
+        <button class="nav-btn active" data-section="game-section">Игра</button>
+        <button class="nav-btn" data-section="stats-section">Статистика</button>
     </div>
 
     <div id="notifications"></div>
