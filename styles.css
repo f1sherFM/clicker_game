@@ -3,15 +3,10 @@ body {
     background-color: #1e1e2f;
     color: #ffffff;
     margin: 0;
+    display: flex;
     height: 100vh;
     overflow: hidden;
-    transition: all 0.3s ease;
-}
-
-body.mobile-mode {
-    flex-direction: column;
-    align-items: center;
-    padding: 10px;
+    position: relative;
 }
 
 .left-sidebar {
@@ -26,12 +21,6 @@ body.mobile-mode {
     bottom: 0;
 }
 
-body.mobile-mode .left-sidebar {
-    width: 100%;
-    position: relative;
-    margin-bottom: 20px;
-}
-
 .main-content {
     flex: 1;
     display: flex;
@@ -41,11 +30,6 @@ body.mobile-mode .left-sidebar {
     padding: 20px;
     margin-left: 200px;
     margin-right: 300px;
-}
-
-body.mobile-mode .main-content {
-    margin: 0;
-    width: 100%;
 }
 
 .stats {
@@ -58,17 +42,9 @@ h1 {
     margin-bottom: 20px;
 }
 
-body.mobile-mode h1 {
-    font-size: 1.8rem;
-}
-
 .score-display {
     font-size: 1.8rem;
     margin: 10px 0;
-}
-
-body.mobile-mode .score-display {
-    font-size: 1.5rem;
 }
 
 .exp-bar-container {
@@ -78,10 +54,6 @@ body.mobile-mode .score-display {
     border-radius: 10px;
     overflow: hidden;
     margin: 10px auto;
-}
-
-body.mobile-mode .exp-bar-container {
-    width: 100%;
 }
 
 .exp-bar {
@@ -100,12 +72,6 @@ body.mobile-mode .exp-bar-container {
     border-radius: 5px;
     cursor: pointer;
     margin: 20px 0;
-}
-
-body.mobile-mode .click-btn {
-    width: 100%;
-    font-size: 1.5rem;
-    padding: 20px;
 }
 
 .click-btn:hover {
@@ -127,12 +93,6 @@ body.mobile-mode .click-btn {
     margin: 10px 0;
 }
 
-body.mobile-mode .prestige-btn {
-    width: 100%;
-    font-size: 1.2rem;
-    padding: 15px;
-}
-
 .prestige-btn:hover {
     background-color: #e68a00;
 }
@@ -149,12 +109,6 @@ body.mobile-mode .prestige-btn {
     bottom: 0;
 }
 
-body.mobile-mode .sidebar {
-    width: 100%;
-    position: relative;
-    margin-top: 20px;
-}
-
 .shop-item {
     background-color: #2a2a3f;
     border-radius: 8px;
@@ -163,26 +117,14 @@ body.mobile-mode .sidebar {
     text-align: left;
 }
 
-body.mobile-mode .shop-item {
-    padding: 10px;
-}
-
 .shop-item h3, .shop-item h4 {
     font-size: 1.2rem;
     margin-bottom: 5px;
 }
 
-body.mobile-mode .shop-item h3, body.mobile-mode .shop-item h4 {
-    font-size: 1rem;
-}
-
 .shop-item p {
     font-size: 1rem;
     margin: 5px 0;
-}
-
-body.mobile-mode .shop-item p {
-    font-size: 0.9rem;
 }
 
 .shop-btn {
@@ -194,12 +136,6 @@ body.mobile-mode .shop-item p {
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    margin-top: 10px;
-}
-
-body.mobile-mode .shop-btn {
-    font-size: 1.1rem;
-    padding: 12px;
 }
 
 .shop-btn:hover {
@@ -212,12 +148,6 @@ body.mobile-mode .shop-btn {
     right: 20px;
     z-index: 1000;
     width: 300px;
-}
-
-body.mobile-mode #notifications {
-    width: 90%;
-    left: 5%;
-    right: 5%;
 }
 
 .notification {
@@ -253,11 +183,6 @@ body.mobile-mode #notifications {
     margin-top: 20px;
 }
 
-body.mobile-mode .reset-btn {
-    font-size: 1.2rem;
-    padding: 15px;
-}
-
 .reset-btn:hover {
     background-color: #cc0000;
 }
@@ -289,10 +214,6 @@ body.mobile-mode .reset-btn {
     margin-bottom: 20px;
 }
 
-body.mobile-mode .modal-content p {
-    font-size: 1rem;
-}
-
 .modal-buttons {
     display: flex;
     justify-content: space-around;
@@ -304,11 +225,6 @@ body.mobile-mode .modal-content p {
     border: none;
     border-radius: 5px;
     cursor: pointer;
-}
-
-body.mobile-mode .modal-btn {
-    width: 45%;
-    font-size: 1.1rem;
 }
 
 .confirm-btn {
@@ -327,23 +243,4 @@ body.mobile-mode .modal-btn {
 
 .cancel-btn:hover {
     background-color: #45a049;
-}
-
-#mobile-toggle {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 10px 20px;
-    font-size: 1rem;
-    background-color: #2196F3;
-    color: #ffffff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    z-index: 1001;
-}
-
-body.mobile-mode #mobile-toggle {
-    display: none;
 }

@@ -17,7 +17,6 @@ let totalClicks = 0;
 let totalScoreEarned = 0;
 let itemsBought = 0;
 let playTime = 0; // в секундах
-let isMobile = false;
 
 let autoclickers = [
     { name: "Мини-бот", cost: 15, baseCps: 0.1, owned: 0, totalCps: 0 },
@@ -56,7 +55,6 @@ const notificationsContainer = document.getElementById('notifications');
 const resetModal = document.getElementById('reset-modal');
 const confirmReset = document.getElementById('confirm-reset');
 const cancelReset = document.getElementById('cancel-reset');
-const mobileToggle = document.getElementById('mobile-toggle');
 
 function showNotification(message) {
     if (notificationsContainer) {
@@ -90,7 +88,7 @@ function saveProgress() {
             totalCps, autoclickerMultiplier, playerLevel, exp, expNeeded,
             expMultiplier, energyRegenRate, lastSavedTime, offlineScoreTotal,
             offlineExpTotal, totalClicks, totalScoreEarned, itemsBought, playTime,
-            autoclickers, clickUpgrades, passiveUpgrades, items, isMobile
+            autoclickers, clickUpgrades, passiveUpgrades, items
         };
         localStorage.setItem('clickerGameState', JSON.stringify(gameState));
         lastSavedTime = Date.now();
@@ -124,7 +122,6 @@ function loadProgress() {
             totalScoreEarned = Number(gameState.totalScoreEarned) || 0;
             itemsBought = Number(gameState.itemsBought) || 0;
             playTime = Number(gameState.playTime) || 0;
-            isMobile = Boolean(gameState.isMobile) || false;
             autoclickers = gameState.autoclickers || [
                 { name: "Мини-бот", cost: 15, baseCps: 0.1, owned: 0, totalCps: 0 },
                 { name: "Средний бот", cost: 100, baseCps: 1, owned: 0, totalCps: 0 },
@@ -426,6 +423,7 @@ function updateStatsAndLevel() {
             <p>Время игры: ${Math.floor(playTime / 60)} минут</p>
             <button class="reset-btn" id="reset-button">Сбросить прогресс</button>
         `;
+        // Переназначаем обработчик для кнопки сброса
         const resetButton = document.getElementById('reset-button');
         if (resetButton) {
             resetButton.removeEventListener('click', showResetModal);
@@ -448,7 +446,6 @@ function updateScore() {
         updateShop();
         updateStatsAndLevel();
     }
-    document.body.className = isMobile ? 'mobile-mode' : '';
 }
 
 shopContainer.addEventListener('click', (e) => {
@@ -465,13 +462,6 @@ shopContainer.addEventListener('click', (e) => {
     else if (type === 'passiveupgrade') buyPassiveUpgrade(index);
     else if (type === 'item') buyItem(index);
 });
-
-function toggleMobileMode() {
-    isMobile = !isMobile;
-    updateScore();
-    saveProgress();
-    showNotification(`Режим ${isMobile ? 'телефона' : 'десктопа'} активирован!`);
-}
 
 setInterval(() => {
     energy = Math.min(maxEnergy, energy + energyRegenRate / 10);
@@ -509,9 +499,6 @@ window.onload = () => {
                 hideResetModal();
             }
         });
-    }
-    if (mobileToggle) {
-        mobileToggle.addEventListener('click', toggleMobileMode);
     }
     updateScore();
 };
