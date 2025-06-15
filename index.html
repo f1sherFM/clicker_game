@@ -3,39 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Кликер</title>
+    <title>Кликер ПРО</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="container">
         <div class="section" id="shop-section">
-            <div class="sidebar" id="shop">
-                <!-- Содержимое магазина -->
-            </div>
+            <div class="sidebar" id="shop"></div>
         </div>
 
-        <div class="section" id="game-section">
+        <div class="section active" id="game-section">
             <div class="main-content">
                 <h1>Кликер</h1>
                 <div class="stats">
                     <div class="score-display" id="score">Очки: 0</div>
-                    <div id="cps">Очков/сек: 0</div>
+                    <div id="cps">CPS: 0</div>
                     <div id="energy">Энергия: 100/100</div>
                     <div id="level">Уровень: 1</div>
-                    <div id="exp">Опыт: 0 / 60</div>
+                    <div id="exp">EXP: 0/60</div>
                     <div class="exp-bar-container">
                         <div class="exp-bar" id="exp-bar"></div>
                     </div>
                 </div>
                 <button class="click-btn" id="click-button">Клик</button>
-                <button class="prestige-btn" id="prestige-button">Престиж (x1.1) за 10,000 очков</button>
+                <button class="prestige-btn" id="prestige-button">Престиж (x1.1) за 10K</button>
             </div>
         </div>
 
         <div class="section" id="stats-section">
-            <div class="left-sidebar" id="stats-sidebar">
-                <!-- Содержимое статистики -->
-            </div>
+            <div class="left-sidebar" id="stats-sidebar"></div>
         </div>
     </div>
 

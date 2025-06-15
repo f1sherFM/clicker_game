@@ -1,6 +1,6 @@
 // Константы и настройки
-const SAVE_VERSION = 1;
-const SAVE_KEY = 'clickerGameState';
+const SAVE_VERSION = 2; // Увеличиваем версию из-за новых полей
+const SAVE_KEY = 'clickerProState';
 const AUTOSAVE_INTERVAL = 5 * 60 * 1000; // 5 минут
 
 // Игровые переменные
@@ -24,24 +24,31 @@ let gameState = {
     totalScoreEarned: 0,
     itemsBought: 0,
     playTime: 0,
+    activeBoosts: [],
     autoclickers: [
-        { name: "Мини-бот", cost: 15, baseCps: 0.1, owned: 0, totalCps: 0 },
-        { name: "Средний бот", cost: 100, baseCps: 1, owned: 0, totalCps: 0 },
-        { name: "Мега-бот", cost: 1000, baseCps: 10, owned: 0, totalCps: 0 }
+        { name: "Мини-бот", cost: 30, baseCps: 0.1, owned: 0, totalCps: 0 },
+        { name: "Средний бот", cost: 250, baseCps: 1, owned: 0, totalCps: 0 },
+        { name: "Мега-бот", cost: 2000, baseCps: 10, owned: 0, totalCps: 0 },
+        { name: "Гига-бот", cost: 10000, baseCps: 50, owned: 0, totalCps: 0 },
+        { name: "Легендарный бот", cost: 50000, baseCps: 200, owned: 0, totalCps: 0 }
     ],
     clickUpgrades: [
-        { name: "Усиленный клик", cost: 50, multiplier: 2 },
-        { name: "Мега-клик", cost: 200, multiplier: 5 },
-        { name: "Гипер-клик", cost: 1000, multiplier: 10 }
+        { name: "Усиленный клик", cost: 150, multiplier: 2 },
+        { name: "Мега-клик", cost: 750, multiplier: 5 },
+        { name: "Гипер-клик", cost: 3000, multiplier: 10 },
+        { name: "Квантовый клик", cost: 15000, multiplier: 25 }
     ],
     passiveUpgrades: [
-        { name: "Эффективность ботов +10%", cost: 300, cpsBoost: 1.1 },
-        { name: "Эффективность ботов +25%", cost: 1500, cpsBoost: 1.25 },
-        { name: "Супер эффективность", cost: 5000, cpsBoost: 1.5 }
+        { name: "Эффективность ботов +10%", cost: 1000, cpsBoost: 1.1 },
+        { name: "Эффективность ботов +25%", cost: 5000, cpsBoost: 1.25 },
+        { name: "Супер эффективность", cost: 20000, cpsBoost: 1.5 },
+        { name: "Квантовая оптимизация", cost: 75000, cpsBoost: 2.0 }
     ],
     items: [
-        { name: "Энергетик", cost: 250, bonusEnergy: 30 },
-        { name: "Кристалл опыта", cost: 500, expBoost: 1.2 }
+        { name: "Энергетик", cost: 500, bonusEnergy: 30 },
+        { name: "Кристалл опыта", cost: 1500, expBoost: 1.2 },
+        { name: "Буст CPS x2", cost: 2000, duration: 30, cpsMultiplier: 2, type: "boost" },
+        { name: "+50 энергии", cost: 5000, bonusMaxEnergy: 50 }
     ]
 };
 
@@ -67,7 +74,6 @@ const elements = {
 // ======================
 // Система сохранения
 // ======================
-
 function saveProgress(showNotification = false) {
     try {
         gameState.lastSavedTime = Date.now();
@@ -124,9 +130,8 @@ function loadProgress() {
 }
 
 // ======================
-// Основные игровые функции
+// Игровые функции
 // ======================
-
 function showNotification(message) {
     if (!elements.notificationsContainer) return;
     
@@ -145,7 +150,6 @@ function handleClick(e) {
     e.preventDefault();
     e.stopPropagation();
     
-    // Визуальная обратная связь
     elements.clickButton.classList.add('active');
     setTimeout(() => elements.clickButton.classList.remove('active'), 100);
     
@@ -169,7 +173,7 @@ function buyAutoclicker(index) {
         gameState.score -= ac.cost;
         ac.owned += 1;
         ac.totalCps = ac.owned * ac.baseCps * gameState.autoclickerMultiplier;
-        ac.cost = Math.round(ac.cost * 1.2);
+        ac.cost = Math.round(ac.cost * 1.15);
         gameState.totalCps = gameState.autoclickers.reduce((sum, a) => sum + a.totalCps, 0);
         gameState.itemsBought += 1;
         updateScore();
@@ -212,30 +216,78 @@ function buyUpgrade(type, index) {
     }
 }
 
+function activateBoost(boost) {
+    const originalMultiplier = gameState.autoclickerMultiplier;
+    gameState.autoclickerMultiplier *= boost.cpsMultiplier;
+    gameState.activeBoosts.push({
+        type: "cps",
+        endTime: Date.now() + boost.duration * 1000
+    });
+
+    // Обновляем CPS
+    gameState.autoclickers.forEach(a => {
+        a.totalCps = a.owned * a.baseCps * gameState.autoclickerMultiplier;
+    });
+    gameState.totalCps = gameState.autoclickers.reduce((sum, a) => sum + a.totalCps, 0);
+
+    // Визуальный эффект
+    document.querySelectorAll('.shop-btn').forEach(btn => {
+        if (btn.textContent.includes("Буст")) {
+            btn.classList.add('boost-active');
+        }
+    });
+
+    setTimeout(() => {
+        gameState.autoclickerMultiplier = originalMultiplier;
+        gameState.activeBoosts = gameState.activeBoosts.filter(b => b.type !== "cps");
+        gameState.autoclickers.forEach(a => {
+            a.totalCps = a.owned * a.baseCps * gameState.autoclickerMultiplier;
+        });
+        gameState.totalCps = gameState.autoclickers.reduce((sum, a) => sum + a.totalCps, 0);
+        updateScore();
+        
+        document.querySelectorAll('.shop-btn').forEach(btn => {
+            btn.classList.remove('boost-active');
+        });
+    }, boost.duration * 1000);
+}
+
 function buyItem(index) {
     const item = gameState.items[index];
     if (gameState.score >= item.cost) {
         gameState.score -= item.cost;
         if (item.bonusEnergy) {
             gameState.energy = Math.min(gameState.maxEnergy, gameState.energy + item.bonusEnergy);
+            showNotification(`Использован ${item.name}! +${item.bonusEnergy} энергии`);
         }
         if (item.expBoost) {
             gameState.expMultiplier *= item.expBoost;
             gameState.items.splice(index, 1);
+            showNotification(`Использован ${item.name}! Множитель опыта: x${gameState.expMultiplier.toFixed(1)}`);
+        }
+        if (item.cpsMultiplier) {
+            activateBoost(item);
+            showNotification(`Активирован ${item.name}! CPS x${item.cpsMultiplier} на ${item.duration} сек`);
+        }
+        if (item.bonusMaxEnergy) {
+            gameState.maxEnergy += item.bonusMaxEnergy;
+            gameState.items.splice(index, 1);
+            showNotification(`Использован ${item.name}! Макс. энергия: ${gameState.maxEnergy}`);
         }
         gameState.itemsBought += 1;
         updateScore();
-        showNotification(`Использован: ${item.name}!`);
     } else {
         showNotification(`Нужно ещё ${Math.ceil(item.cost - gameState.score)} очков`);
     }
 }
 
 function prestige() {
-    if (gameState.score >= 10000) {
+    const requiredScore = 10000 * Math.pow(1.5, gameState.prestigeMultiplier - 1);
+    
+    if (gameState.score >= requiredScore) {
         const oldMultiplier = gameState.prestigeMultiplier;
+        const prestigeBonus = 0.1 + (gameState.playerLevel * 0.01);
         
-        // Сброс состояния
         gameState = {
             ...gameState,
             score: 0,
@@ -248,36 +300,43 @@ function prestige() {
                 ...a,
                 owned: 0,
                 totalCps: 0,
-                cost: a.baseCps === 0.1 ? 15 : a.baseCps === 1 ? 100 : 1000
+                cost: Math.round(a.cost * 0.9)
             })),
             clickUpgrades: [
-                { name: "Усиленный клик", cost: 50, multiplier: 2 },
-                { name: "Мега-клик", cost: 200, multiplier: 5 },
-                { name: "Гипер-клик", cost: 1000, multiplier: 10 }
+                { name: "Усиленный клик", cost: 150, multiplier: 2 },
+                { name: "Мега-клик", cost: 750, multiplier: 5 },
+                { name: "Гипер-клик", cost: 3000, multiplier: 10 },
+                { name: "Квантовый клик", cost: 15000, multiplier: 25 }
             ],
             passiveUpgrades: [
-                { name: "Эффективность ботов +10%", cost: 300, cpsBoost: 1.1 },
-                { name: "Эффективность ботов +25%", cost: 1500, cpsBoost: 1.25 },
-                { name: "Супер эффективность", cost: 5000, cpsBoost: 1.5 }
+                { name: "Эффективность ботов +10%", cost: 1000, cpsBoost: 1.1 },
+                { name: "Эффективность ботов +25%", cost: 5000, cpsBoost: 1.25 },
+                { name: "Супер эффективность", cost: 20000, cpsBoost: 1.5 },
+                { name: "Квантовая оптимизация", cost: 75000, cpsBoost: 2.0 }
             ],
             items: [
-                { name: "Энергетик", cost: 250, bonusEnergy: 30 },
-                { name: "Кристалл опыта", cost: 500, expBoost: 1.2 }
+                { name: "Энергетик", cost: 500, bonusEnergy: 30 },
+                { name: "Кристалл опыта", cost: 1500, expBoost: 1.2 },
+                { name: "Буст CPS x2", cost: 2000, duration: 30, cpsMultiplier: 2, type: "boost" },
+                { name: "+50 энергии", cost: 5000, bonusMaxEnergy: 50 }
             ],
-            prestigeMultiplier: gameState.prestigeMultiplier + 0.1
+            prestigeMultiplier: gameState.prestigeMultiplier + prestigeBonus,
+            playerLevel: 1,
+            exp: 0,
+            expNeeded: 60,
+            activeBoosts: []
         };
         
         updateScore();
-        showNotification(`Престиж! Множитель: ${oldMultiplier.toFixed(1)} → ${gameState.prestigeMultiplier.toFixed(1)}`);
+        showNotification(`Престиж ${Math.floor(oldMultiplier)}! Множитель: ${oldMultiplier.toFixed(1)} → ${gameState.prestigeMultiplier.toFixed(1)}`);
     } else {
-        showNotification(`Нужно 10,000 очков (ещё ${10000 - gameState.score})`);
+        showNotification(`Нужно ${Math.floor(requiredScore)} очков (ещё ${Math.floor(requiredScore - gameState.score)})`);
     }
 }
 
 // ======================
 // Вспомогательные функции
 // ======================
-
 function grantLevelReward() {
     const rewards = [
         {
@@ -376,9 +435,13 @@ function updateShop() {
             ${gameState.items.map((item, i) => `
                 <div class="shop-item">
                     <h4>${item.name}</h4>
-                    <p>Эффект: ${item.bonusEnergy ? `+${item.bonusEnergy} энергии` : `+20% к опыту`}</p>
+                    <p>Эффект: ${item.bonusEnergy ? `+${item.bonusEnergy} энергии` : 
+                      item.expBoost ? `+20% к опыту` : 
+                      item.cpsMultiplier ? `CPS x${item.cpsMultiplier} на ${item.duration} сек` : 
+                      `+${item.bonusMaxEnergy} макс. энергии`}</p>
                     <p>Стоимость: ${item.cost}</p>
-                    <button class="shop-btn" data-type="item" data-index="${i}">Купить</button>
+                    <button class="shop-btn ${item.type === 'boost' ? 'boost' : ''}" 
+                            data-type="item" data-index="${i}">Купить</button>
                 </div>
             `).join('')}
         ` : ''}
@@ -387,17 +450,43 @@ function updateShop() {
 
 function updateStatsAndLevel() {
     if (elements.statsContainer) {
+        const timeToNextLevel = (gameState.expNeeded - gameState.exp) / (gameState.totalCps * gameState.expMultiplier / 10);
+        const activeBoostsText = gameState.activeBoosts.length > 0 ? 
+            `Активные бусты: ${gameState.activeBoosts.length}` : "";
+        
         elements.statsContainer.innerHTML = `
             <h2>Статистика</h2>
             <p>Кликов: ${gameState.totalClicks}</p>
             <p>Всего очков: ${Math.floor(gameState.totalScoreEarned)}</p>
             <p>Оффлайн очки: ${Math.floor(gameState.offlineScoreTotal)}</p>
             <p>Оффлайн EXP: ${Math.floor(gameState.offlineExpTotal)}</p>
-            <p>Предметов: ${gameState.itemsBought}</p>
+            <p>Предметов куплено: ${gameState.itemsBought}</p>
             <p>Время игры: ${Math.floor(gameState.playTime / 60)} мин</p>
+            <p>Текущий CPS: ${(gameState.totalCps * gameState.prestigeMultiplier).toFixed(1)}</p>
+            <p>Время до повышения уровня: ${timeToNextLevel > 0 ? timeToNextLevel.toFixed(1) + " сек" : "Макс. уровень"}</p>
+            ${activeBoostsText}
+            <canvas id="statsChart" width="300" height="150"></canvas>
             <button class="reset-btn" id="reset-button">Сбросить прогресс</button>
             <button class="save-btn" id="save-button">Сохранить</button>
         `;
+
+        // Отрисовка графика
+        if (typeof Chart !== 'undefined') {
+            const ctx = document.getElementById('statsChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array(10).fill(0).map((_, i) => `${i * 10} сек`),
+                    datasets: [{
+                        label: 'Рост очков',
+                        data: Array(10).fill(0).map((_, i) => i * gameState.totalCps * 10),
+                        borderColor: '#4caf50',
+                        tension: 0.1
+                    }]
+                },
+                options: { responsive: false }
+            });
+        }
         
         document.getElementById('reset-button')?.addEventListener('mousedown', showResetModal);
         document.getElementById('save-button')?.addEventListener('mousedown', () => saveProgress(true));
@@ -415,7 +504,8 @@ function updateScore() {
         elements.scoreDisplay.textContent = `Очки: ${Math.floor(gameState.score)}`;
         elements.cpsDisplay.textContent = `CPS: ${(gameState.totalCps * gameState.prestigeMultiplier).toFixed(1)}`;
         elements.energyDisplay.textContent = `Энергия: ${Math.floor(gameState.energy)}/${gameState.maxEnergy}`;
-        elements.prestigeButton.textContent = `Престиж (x${(gameState.prestigeMultiplier + 0.1).toFixed(1)}) за 10K`;
+        const requiredScore = 10000 * Math.pow(1.5, gameState.prestigeMultiplier - 1);
+        elements.prestigeButton.textContent = `Престиж (x${(gameState.prestigeMultiplier + 0.1).toFixed(1)}) за ${Math.floor(requiredScore)}`;
         updateShop();
         updateStatsAndLevel();
     }
@@ -428,7 +518,6 @@ function handleShopInteraction(e) {
     e.preventDefault();
     e.stopPropagation();
     
-    // Визуальная обратная связь
     button.classList.add('active');
     setTimeout(() => button.classList.remove('active'), 100);
     
@@ -436,18 +525,10 @@ function handleShopInteraction(e) {
     const index = parseInt(button.dataset.index);
     
     switch (type) {
-        case 'autoclicker': 
-            buyAutoclicker(index);
-            break;
-        case 'click': 
-            buyUpgrade('click', index);
-            break;
-        case 'passive': 
-            buyUpgrade('passive', index);
-            break;
-        case 'item': 
-            buyItem(index);
-            break;
+        case 'autoclicker': buyAutoclicker(index); break;
+        case 'click': buyUpgrade('click', index); break;
+        case 'passive': buyUpgrade('passive', index); break;
+        case 'item': buyItem(index); break;
     }
 }
 
@@ -479,9 +560,7 @@ function handleReset() {
 // ======================
 // Инициализация игры
 // ======================
-
 function setupEventListeners() {
-    // Основные кнопки
     elements.clickButton?.addEventListener('mousedown', handleClick);
     elements.clickButton?.addEventListener('touchstart', handleClick, { passive: true });
     
@@ -491,7 +570,6 @@ function setupEventListeners() {
         prestige();
     }, { passive: false });
     
-    // Навигация
     elements.navButtons.forEach(btn => {
         btn.addEventListener('mousedown', () => switchSection(btn.dataset.section));
         btn.addEventListener('touchstart', (e) => {
@@ -500,11 +578,9 @@ function setupEventListeners() {
         }, { passive: false });
     });
     
-    // Магазин
     elements.shopContainer?.addEventListener('mousedown', handleShopInteraction);
     elements.shopContainer?.addEventListener('touchstart', handleShopInteraction, { passive: true });
     
-    // Модальное окно
     elements.confirmReset?.addEventListener('mousedown', handleReset);
     elements.cancelReset?.addEventListener('mousedown', hideResetModal);
     elements.resetModal?.addEventListener('mousedown', (e) => {
@@ -512,11 +588,13 @@ function setupEventListeners() {
     });
 }
 
+let lastUpdate = 0;
+let passiveUpdateAccumulator = 0;
+
 function gameLoop(timestamp) {
     const deltaTime = timestamp - (lastUpdate || timestamp);
     lastUpdate = timestamp;
     
-    // Пассивный доход (10 раз в секунду)
     passiveUpdateAccumulator += deltaTime;
     while (passiveUpdateAccumulator >= 100) {
         gameState.energy = Math.min(
@@ -535,20 +613,13 @@ function gameLoop(timestamp) {
     requestAnimationFrame(gameLoop);
 }
 
-let lastUpdate = 0;
-let passiveUpdateAccumulator = 0;
-
 window.onload = () => {
-    // Инициализация
     loadProgress();
     setupEventListeners();
     switchSection('game-section');
     updateScore();
     
-    // Запуск игрового цикла
     requestAnimationFrame(gameLoop);
-    
-    // Автосохранение
     setInterval(saveProgress, AUTOSAVE_INTERVAL);
     window.addEventListener('beforeunload', () => saveProgress());
 };

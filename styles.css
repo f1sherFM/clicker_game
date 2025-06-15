@@ -387,4 +387,46 @@ button:active {
     .prestige-btn {
         font-size: 1rem;
     }
+
+/* Основные стили (остаются без изменений) */
+/* Добавляем только новые стили для графика и кнопок */
+
+#statsChart {
+    background-color: #2a2a3f;
+    border-radius: 8px;
+    margin: 10px 0;
+    max-width: 100%;
+}
+
+.shop-item {
+    background-color: #2a2a3f;
+    border-radius: 8px;
+    padding: 12px;
+    margin: 8px 0;
+}
+
+.shop-item h4 {
+    color: #4caf50;
+    margin-bottom: 5px;
+}
+
+.shop-btn {
+    background-color: #2196F3;
+}
+
+.shop-btn.boost {
+    background-color: #ff9800;
+}
+
+/* Анимация для бустов */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.boost-active {
+    animation: pulse 1s infinite;
+    border: 2px solid #ffeb3b;
+}
 }
