@@ -72,6 +72,26 @@ const elements = {
 };
 
 // ======================
+// Игровые функции
+// ======================
+function showNotification(message) {
+    if (!elements.notificationsContainer) {
+        console.warn('Контейнер уведомлений не найден!');
+        return;
+    }
+    
+    const notification = document.createElement('div');
+    notification.className = 'notification';
+    notification.textContent = message;
+    elements.notificationsContainer.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        setTimeout(() => notification.remove(), 300);
+    }, 3500);
+}
+
+// ======================
 // Система сохранения
 // ======================
 function saveProgress(showNotification = false) {
@@ -81,10 +101,15 @@ function saveProgress(showNotification = false) {
             version: SAVE_VERSION,
             ...gameState
         }));
-        if (showNotification) showNotification('Прогресс сохранён!');
+        if (showNotification && typeof showNotification === 'function') {
+            showNotification('Прогресс сохранён!');
+        }
+        console.log('Прогресс успешно сохранён:', gameState);
     } catch (e) {
         console.error('Ошибка сохранения:', e);
-        showNotification('Ошибка сохранения!');
+        if (typeof showNotification === 'function') {
+            showNotification('Ошибка сохранения!');
+        }
     }
 }
 
@@ -119,7 +144,9 @@ function loadProgress() {
             gameState.offlineExpTotal += offlineExp;
             gameState.energy += offlineEnergy;
             
-            showNotification(`Оффлайн: +${Math.floor(offlineScore)} очков, +${Math.floor(offlineExp)} EXP, +${Math.floor(offlineEnergy)} энергии`);
+            if (typeof showNotification === 'function') {
+                showNotification(`Оффлайн: +${Math.floor(offlineScore)} очков, +${Math.floor(offlineExp)} EXP, +${Math.floor(offlineEnergy)} энергии`);
+            }
         }
 
         return true;
@@ -127,23 +154,6 @@ function loadProgress() {
         console.error('Ошибка загрузки:', e);
         return false;
     }
-}
-
-// ======================
-// Игровые функции
-// ======================
-function showNotification(message) {
-    if (!elements.notificationsContainer) return;
-    
-    const notification = document.createElement('div');
-    notification.className = 'notification';
-    notification.textContent = message;
-    elements.notificationsContainer.appendChild(notification);
-    
-    setTimeout(() => {
-        notification.style.opacity = '0';
-        setTimeout(() => notification.remove(), 300);
-    }, 3500);
 }
 
 function handleClick(e) {
@@ -159,11 +169,13 @@ function handleClick(e) {
         gameState.totalScoreEarned += pointsEarned;
         gameState.energy -= 1;
         gameState.totalClicks += 1;
-        gameState.exp += 1 * gameState.expMultiplier;
+        gameState.expbios += 1 * gameState.expMultiplier;
         checkLevelUp();
         updateScore();
     } else {
-        showNotification("Недостаточно энергии!");
+        if (typeof showNotification === 'function') {
+            showNotification("Недостаточно энергии!");
+        }
     }
 }
 
@@ -177,9 +189,13 @@ function buyAutoclicker(index) {
         gameState.totalCps = gameState.autoclickers.reduce((sum, a) => sum + a.totalCps, 0);
         gameState.itemsBought += 1;
         updateScore();
-        showNotification(`Куплен ${ac.name}! (+${ac.baseCps} CPS)`);
+        if (typeof showNotification === 'function') {
+            showNotification(`Куплен ${ac.name}! (+${ac.baseCps} CPS)`);
+        }
     } else {
-        showNotification(`Нужно ещё ${Math.ceil(ac.cost - gameState.score)} очков`);
+        if (typeof showNotification === 'function') {
+            showNotification(`Нужно ещё ${Math.ceil(ac.cost - gameState.score)} очков`);
+        }
     }
 }
 
@@ -193,9 +209,13 @@ function buyUpgrade(type, index) {
             gameState.clickUpgrades.splice(index, 1);
             gameState.itemsBought += 1;
             updateScore();
-            showNotification(`Улучшено: ${upgrade.name}!`);
+            if (typeof showNotification === 'function') {
+                showNotification(`Улучшено: ${upgrade.name}!`);
+            }
         } else {
-            showNotification(`Нужно ещё ${Math.ceil(upgrade.cost - gameState.score)} очков`);
+            if (typeof showNotification === 'function') {
+                showNotification(`Нужно ещё ${Math.ceil(upgrade.cost - gameState.score)} очков`);
+            }
         }
     } else if (type === 'passive') {
         upgrade = gameState.passiveUpgrades[index];
@@ -209,9 +229,13 @@ function buyUpgrade(type, index) {
             gameState.passiveUpgrades.splice(index, 1);
             gameState.itemsBought += 1;
             updateScore();
-            showNotification(`Улучшено: ${upgrade.name}!`);
+            if (typeof showNotification === 'function') {
+                showNotification(`Улучшено: ${upgrade.name}!`);
+            }
         } else {
-            showNotification(`Нужно ещё ${Math.ceil(upgrade.cost - gameState.score)} очков`);
+            if (typeof showNotification === 'function') {
+                showNotification(`Нужно ещё ${Math.ceil(upgrade.cost - gameState.score)} очков`);
+            }
         }
     }
 }
@@ -258,26 +282,36 @@ function buyItem(index) {
         gameState.score -= item.cost;
         if (item.bonusEnergy) {
             gameState.energy = Math.min(gameState.maxEnergy, gameState.energy + item.bonusEnergy);
-            showNotification(`Использован ${item.name}! +${item.bonusEnergy} энергии`);
+            if (typeof showNotification === 'function') {
+                showNotification(`Использован ${item.name}! +${item.bonusEnergy} энергии`);
+            }
         }
         if (item.expBoost) {
             gameState.expMultiplier *= item.expBoost;
             gameState.items.splice(index, 1);
-            showNotification(`Использован ${item.name}! Множитель опыта: x${gameState.expMultiplier.toFixed(1)}`);
+            if (typeof showNotification === 'function') {
+                showNotification(`Использован ${item.name}! Множитель опыта: x${gameState.expMultiplier.toFixed(1)}`);
+            }
         }
         if (item.cpsMultiplier) {
             activateBoost(item);
-            showNotification(`Активирован ${item.name}! CPS x${item.cpsMultiplier} на ${item.duration} сек`);
+            if (typeof showNotification === 'function') {
+                showNotification(`Активирован ${item.name}! CPS x${item.cpsMultiplier} на ${item.duration} сек`);
+            }
         }
         if (item.bonusMaxEnergy) {
             gameState.maxEnergy += item.bonusMaxEnergy;
             gameState.items.splice(index, 1);
-            showNotification(`Использован ${item.name}! Макс. энергия: ${gameState.maxEnergy}`);
+            if (typeof showNotification === 'function') {
+                showNotification(`Использован ${item.name}! Макс. энергия: ${gameState.maxEnergy}`);
+            }
         }
         gameState.itemsBought += 1;
         updateScore();
     } else {
-        showNotification(`Нужно ещё ${Math.ceil(item.cost - gameState.score)} очков`);
+        if (typeof showNotification === 'function') {
+            showNotification(`Нужно ещё ${Math.ceil(item.cost - gameState.score)} очков`);
+        }
     }
 }
 
@@ -328,9 +362,13 @@ function prestige() {
         };
         
         updateScore();
-        showNotification(`Престиж ${Math.floor(oldMultiplier)}! Множитель: ${oldMultiplier.toFixed(1)} → ${gameState.prestigeMultiplier.toFixed(1)}`);
+        if (typeof showNotification === 'function') {
+            showNotification(`Престиж ${Math.floor(oldMultiplier)}! Множитель: ${oldMultiplier.toFixed(1)} → ${gameState.prestigeMultiplier.toFixed(1)}`);
+        }
     } else {
-        showNotification(`Нужно ${Math.floor(requiredScore)} очков (ещё ${Math.floor(requiredScore - gameState.score)})`);
+        if (typeof showNotification === 'function') {
+            showNotification(`Нужно ${Math.floor(requiredScore)} очков (ещё ${Math.floor(requiredScore - gameState.score)})`);
+        }
     }
 }
 
@@ -386,7 +424,9 @@ function checkLevelUp() {
         gameState.prestigeMultiplier *= 1.1;
         gameState.expNeeded = Math.round(gameState.expNeeded * 1.75);
         const rewardText = grantLevelReward();
-        showNotification(`Уровень ${gameState.playerLevel}! +10% множитель. Награда: ${rewardText}`);
+        if (typeof showNotification === 'function') {
+            showNotification(`Уровень ${gameState.playerLevel}! +10% множитель. Награда: ${rewardText}`);
+        }
     }
 }
 
@@ -488,8 +528,32 @@ function updateStatsAndLevel() {
             });
         }
         
-        document.getElementById('reset-button')?.addEventListener('mousedown', showResetModal);
-        document.getElementById('save-button')?.addEventListener('mousedown', () => saveProgress(true));
+        // Добавляем обработчики для кнопок "Сбросить" и "Сохранить"
+        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        const resetButton = document.getElementById('reset-button');
+        const saveButton = document.getElementById('save-button');
+
+        if (resetButton) {
+            if (isTouchDevice) {
+                resetButton.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    showResetModal();
+                }, { passive: false });
+            } else {
+                resetButton.addEventListener('mousedown', showResetModal);
+            }
+        }
+
+        if (saveButton) {
+            if (isTouchDevice) {
+                saveButton.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    saveProgress(true);
+                }, { passive: false });
+            } else {
+                saveButton.addEventListener('mousedown', () => saveProgress(true));
+            }
+        }
     }
     
     if (elements.levelDisplay && elements.expDisplay && elements.expBar) {
@@ -543,16 +607,22 @@ function switchSection(sectionId) {
 }
 
 function showResetModal() {
-    elements.resetModal.style.display = 'flex';
+    if (elements.resetModal) {
+        elements.resetModal.style.display = 'flex';
+    }
 }
 
 function hideResetModal() {
-    elements.resetModal.style.display = 'none';
+    if (elements.resetModal) {
+        elements.resetModal.style.display = 'none';
+    }
 }
 
 function handleReset() {
     if (confirm("Вы уверены, что хотите сбросить прогресс? Все данные будут потеряны!")) {
+        console.log('Сбрасываем прогресс...');
         localStorage.removeItem(SAVE_KEY);
+        hideResetModal(); // Закрываем модальное окно перед перезагрузкой
         location.reload();
     }
 }
@@ -561,28 +631,60 @@ function handleReset() {
 // Инициализация игры
 // ======================
 function setupEventListeners() {
-    elements.clickButton?.addEventListener('mousedown', handleClick);
-    elements.clickButton?.addEventListener('touchstart', handleClick, { passive: true });
-    
-    elements.prestigeButton?.addEventListener('mousedown', prestige);
-    elements.prestigeButton?.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        prestige();
-    }, { passive: false });
-    
-    elements.navButtons.forEach(btn => {
-        btn.addEventListener('mousedown', () => switchSection(btn.dataset.section));
-        btn.addEventListener('touchstart', (e) => {
+    // Проверяем, поддерживает ли устройство сенсорные события
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+    // Обработчики для кнопки клика
+    if (isTouchDevice) {
+        elements.clickButton?.addEventListener('touchstart', handleClick, { passive: false });
+    } else {
+        elements.clickButton?.addEventListener('mousedown', handleClick);
+    }
+
+    // Обработчики для кнопки престижа
+    if (isTouchDevice) {
+        elements.prestigeButton?.addEventListener('touchstart', (e) => {
             e.preventDefault();
-            switchSection(btn.dataset.section);
+            prestige();
         }, { passive: false });
+    } else {
+        elements.prestigeButton?.addEventListener('mousedown', prestige);
+    }
+
+    // Обработчики для навигационных кнопок
+    elements.navButtons.forEach(btn => {
+        if (isTouchDevice) {
+            btn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                switchSection(btn.dataset.section);
+            }, { passive: false });
+        } else {
+            btn.addEventListener('mousedown', () => switchSection(btn.dataset.section));
+        }
     });
-    
-    elements.shopContainer?.addEventListener('mousedown', handleShopInteraction);
-    elements.shopContainer?.addEventListener('touchstart', handleShopInteraction, { passive: true });
-    
-    elements.confirmReset?.addEventListener('mousedown', handleReset);
-    elements.cancelReset?.addEventListener('mousedown', hideResetModal);
+
+    // Обработчики для магазина
+    if (isTouchDevice) {
+        elements.shopContainer?.addEventListener('touchstart', handleShopInteraction, { passive: false });
+    } else {
+        elements.shopContainer?.addEventListener('mousedown', handleShopInteraction);
+    }
+
+    // Обработчики для модального окна сброса
+    if (isTouchDevice) {
+        elements.confirmReset?.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            handleReset();
+        }, { passive: false });
+        elements.cancelReset?.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            hideResetModal();
+        }, { passive: false });
+    } else {
+        elements.confirmReset?.addEventListener('mousedown', handleReset);
+        elements.cancelReset?.addEventListener('mousedown', hideResetModal);
+    }
+
     elements.resetModal?.addEventListener('mousedown', (e) => {
         if (e.target === elements.resetModal) hideResetModal();
     });
