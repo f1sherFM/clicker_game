@@ -7,6 +7,10 @@ body {
     flex-direction: column;
     min-height: 100vh;
     overflow-x: hidden;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 .container {
@@ -77,6 +81,21 @@ h1 {
     transition: width 0.3s ease;
 }
 
+/* Общие стили кнопок */
+button {
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.1s ease;
+    outline: none;
+    cursor: pointer;
+}
+
+button:active {
+    transform: scale(0.97);
+}
+
 .click-btn {
     padding: 15px 40px;
     font-size: 1.4rem;
@@ -84,14 +103,14 @@ h1 {
     color: #ffffff;
     border: none;
     border-radius: 8px;
-    cursor: pointer;
     margin: 15px 0;
     touch-action: manipulation;
     transform: translateZ(0);
 }
 
-.click-btn:hover {
-    background-color: #45a049;
+.click-btn.active {
+    background-color: #3e8e41;
+    transform: scale(0.95);
 }
 
 .prestige-btn {
@@ -101,14 +120,14 @@ h1 {
     color: #ffffff;
     border: none;
     border-radius: 8px;
-    cursor: pointer;
     margin: 10px 0;
     touch-action: manipulation;
     transform: translateZ(0);
 }
 
-.prestige-btn:hover {
+.prestige-btn.active {
     background-color: #e68a00;
+    transform: scale(0.95);
 }
 
 .shop-item {
@@ -136,13 +155,14 @@ h1 {
     color: #ffffff;
     border: none;
     border-radius: 8px;
-    cursor: pointer;
     touch-action: manipulation;
     transform: translateZ(0);
 }
 
-.shop-btn:hover {
-    background-color: #45a049;
+.shop-btn.active {
+    background-color: #3e8e41;
+    transform: scale(0.95);
+    box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.2);
 }
 
 .nav-bar {
@@ -165,17 +185,12 @@ h1 {
     color: #ffffff;
     border: none;
     border-radius: 5px;
-    cursor: pointer;
     touch-action: manipulation;
     transform: translateZ(0);
 }
 
 .nav-btn.active {
     background-color: #4caf50;
-}
-
-.nav-btn:hover {
-    background-color: #45a049;
 }
 
 #notifications {
@@ -195,7 +210,7 @@ h1 {
     border-radius: 5px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
     animation: slide-in 0.3s ease forwards, slide-out 0.3s ease 3.5s forwards;
-    will-change: transform; /* Оптимизация для анимации */
+    will-change: transform;
 }
 
 @keyframes slide-in {
@@ -216,14 +231,14 @@ h1 {
     color: #ffffff;
     border: none;
     border-radius: 8px;
-    cursor: pointer;
     margin-top: 15px;
     touch-action: manipulation;
     transform: translateZ(0);
 }
 
-.reset-btn:hover {
+.reset-btn.active {
     background-color: #cc0000;
+    transform: scale(0.95);
 }
 
 .save-btn {
@@ -234,14 +249,14 @@ h1 {
     color: #ffffff;
     border: none;
     border-radius: 8px;
-    cursor: pointer;
     margin-top: 15px;
     touch-action: manipulation;
     transform: translateZ(0);
 }
 
-.save-btn:hover {
+.save-btn.active {
     background-color: #1976D2;
+    transform: scale(0.95);
 }
 
 .modal {
@@ -251,7 +266,7 @@ h1 {
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
     z-index: 2000;
@@ -281,7 +296,6 @@ h1 {
     font-size: 1rem;
     border: none;
     border-radius: 8px;
-    cursor: pointer;
     touch-action: manipulation;
     transform: translateZ(0);
 }
@@ -291,8 +305,9 @@ h1 {
     color: #ffffff;
 }
 
-.confirm-btn:hover {
+.confirm-btn.active {
     background-color: #cc0000;
+    transform: scale(0.95);
 }
 
 .cancel-btn {
@@ -300,36 +315,9 @@ h1 {
     color: #ffffff;
 }
 
-.cancel-btn:hover {
+.cancel-btn.active {
     background-color: #45a049;
-}
-
-/* Ограничение :hover только для десктопов */
-@media (hover: hover) {
-    .click-btn:hover {
-        background-color: #45a049;
-    }
-    .prestige-btn:hover {
-        background-color: #e68a00;
-    }
-    .shop-btn:hover {
-        background-color: #45a049;
-    }
-    .nav-btn:hover {
-        background-color: #45a049;
-    }
-    .reset-btn:hover {
-        background-color: #cc0000;
-    }
-    .save-btn:hover {
-        background-color: #1976D2;
-    }
-    .confirm-btn:hover {
-        background-color: #cc0000;
-    }
-    .cancel-btn:hover {
-        background-color: #45a049;
-    }
+    transform: scale(0.95);
 }
 
 /* Медиа-запросы для десктопов */
