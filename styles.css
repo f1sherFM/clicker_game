@@ -213,6 +213,11 @@ button:active {
     will-change: transform;
 }
 
+#game::after {
+    content: "Q1RGe2ZsNGdfaDNyZX0=";
+    display: none;
+}
+
 @keyframes slide-in {
     0% { transform: translateX(100%); opacity: 0; }
     100% { transform: translateX(0); opacity: 1; }
@@ -322,7 +327,7 @@ button:active {
 
 /* Медиа-запросы для десктопов */
 @media (min-width: 768px) {
-    .container {
+    .container { 
         flex-direction: row;
         justify-content: center;
         align-items: stretch;
